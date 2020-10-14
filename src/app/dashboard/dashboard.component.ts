@@ -18,6 +18,7 @@ export class DialogData {
   //private keys: Keypair[];
   private networks: Network[];
   private instanceData = new InstanceData();
+  public VolumeType: {};
 }
 
 
@@ -42,11 +43,14 @@ export class DashboardComponent implements OnInit {
     await new Promise(resolve => setTimeout(() => resolve(), ms)).then(() => console.log("fired"));
   }
 
-  openDialog(): void {
+  openDialog(type: string): void {
 
     const dialogRef = this.dialog.open(Dialogview, {
       width: '0px auto;',
-      height: '0px auto;'
+      height: '0px auto;',
+      data: {
+        VolumeType: type
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -78,18 +82,23 @@ export class Dialogview {
   private hasIcmp: boolean = false;
   private hasHttp: boolean = false;
   private hasHttps: boolean = false;
+  private hasRdp: boolean = false;
   public popupMessage: string = "";
   public privateKey: string;
   public goodKeys: boolean = true;
   public goodRescources: boolean = true;
   public showFIP: boolean = false;
   public gotFIP: boolean = true;
+  public isWindows: boolean;
   public floatingIPs: FIP[];
   public floatingIp: FIP;
   public fipNetwork: Network;
   public instance: Instance;
+  public ramLimit;
+  public flavor: string;
+  public image: string;
 
-  constructor(
+constructor(
     public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
     dialogRef.disableClose = true;
   }
@@ -98,6 +107,22 @@ export class Dialogview {
     this.checkRules();
     this.checkRescources();
     this.getSelectables();
+    if (this.data.VolumeType === 'bio') {
+      this.flavor = 'standard.2core-16ram';
+      this.image = 'debian-9-x86_64_bioconductor';
+      this.ramLimit = 16;
+      this.isWindows = false;
+    } else if (this.data.VolumeType === 'win') {
+      this.flavor = 'standard.medium';
+      this.image = 'windows-server-2019-standard-eval-x86_64';
+      this.ramLimit = 4;
+      this.isWindows = true;
+    } else if (this.data.VolumeType === 'ubuntu') {
+      this.flavor = 'standard.medium';
+      this.image = 'ubuntu-focal-x86_64';
+      this.ramLimit = 4;
+      this.isWindows = false;
+    }
 
   }
   async delay(ms: number) {
@@ -138,7 +163,7 @@ export class Dialogview {
     )
   }
 
-  checkRules(): void {  
+  checkRules(): void {
     this.dataService.getSecurityGroups().subscribe(data => {
       this.securityGroups = data;
       for (let group of this.securityGroups) {
@@ -148,33 +173,39 @@ export class Dialogview {
         }
       }
       for (let rule of this.securityGroup.security_group_rules) {
-        if (rule.protocol == "tcp") {
-          if (rule.port_range_max==22){
+        if (rule.protocol === "tcp") {
+          if (rule.port_range_max === 22) {
             this.hasSsh = true;
           }
-          if (rule.port_range_max==80){
+          if (rule.port_range_max === 80) {
             this.hasHttp = true;
           }
-          if (rule.port_range_max==443){
+          if (rule.port_range_max === 443) {
             this.hasHttps = true;
           }
-          
+
         }
-        if (rule.protocol == "icmp") {
+        if (rule.protocol === "icmp") {
           this.hasIcmp = true;
+        }
+        if(rule.protocol === "rdp") {
+          this.hasRdp = true;
         }
       }
       if (!this.hasIcmp) {
-        this.dataService.postSecurityRulesIcmp(this.securityGroup.id);
+        this.dataService.postSecurityRule(this.securityGroup.id, "all_icmp");
       }
       if (!this.hasSsh) {
-        this.dataService.postSecurityRulesSsh(this.securityGroup.id);
+        this.dataService.postSecurityRule(this.securityGroup.id, "ssh");
       }
       if (!this.hasHttp) {
-        this.dataService.postSecurityRulesHttp(this.securityGroup.id);
+        this.dataService.postSecurityRule(this.securityGroup.id, "http");
       }
       if (!this.hasHttps) {
-        this.dataService.postSecurityRulesHttps(this.securityGroup.id);
+        this.dataService.postSecurityRule(this.securityGroup.id, "https");
+      }
+      if (!this.hasRdp && this.isWindows) {
+        this.dataService.postSecurityRule(this.securityGroup.id, "rdp");
       }
     },
       err => {
@@ -211,10 +242,10 @@ export class Dialogview {
         this.isVisible = true;
         this.popupMessage = 'You have too many Instances created \n';
       }
-      if ((this.limit.ram.limit - this.limit.ram.used) < 16384) {
+      if ((this.limit.ram.limit - this.limit.ram.used) < this.ramLimit) {
         this.goodRescources = false;
         this.isVisible = true;
-        this.popupMessage += 'You dont have enough free RAM, you need 16GB free \n';
+        this.popupMessage += 'You dont have enough free RAM, you need ' + this.ramLimit + 'B free \n' ;
       }
     });
   }
@@ -223,10 +254,12 @@ export class Dialogview {
   onNoClick(name: string): void {
     var usr_name = this.dataService.getUserName();
     var usr_mail = this.dataService.getUserEmail();
+
     this.isVisible = false;
     this.metaData = { Bioclass_user: usr_name, Bioclass_email: usr_mail };
+    console.log(this.metaData);
     this.instanceData = {
-      flavor: "standard.2core-16ram", image: "debian-9-x86_64_bioconductor",
+      flavor: this.flavor, image: this.image,
       key_name: this.selectedKey, servername: name, network_id: this.selectedNetwork, metadata: this.metaData
     };
     this.dataService.postInstance(this.instanceData).subscribe(data => {
