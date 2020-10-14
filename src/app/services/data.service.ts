@@ -88,42 +88,49 @@ export class DataService {  //DataService takes care of all http requests and co
     return this.httpClient.post<Keypair>(this.apiURL+"/keypairs/",{keyname:name});
   };
 
-  postSecurityRulesSsh(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"ssh"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
+  // postSecurityRulesSsh(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"ssh"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesIcmp(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"all_icmp"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesHttp(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"http"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesHttps(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"https"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
 
-  }
-
-  postSecurityRulesIcmp(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"all_icmp"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
-  postSecurityRulesHttp(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"http"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
-  postSecurityRulesHttps(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"https"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
+  postSecurityRule(id:string, type:string):void{
+    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:type}).toPromise().then((data:any) => {
+      },
+      (err:any) =>{
+        console.log(err);
+      });
+    }
   postFloatinIp(instance_id:string, network_id:string):Observable<FIP>{
     return this.httpClient.post<FIP>(this.apiURL+"/floating_ips/", {instance_id:instance_id,network_id:network_id});
   }
