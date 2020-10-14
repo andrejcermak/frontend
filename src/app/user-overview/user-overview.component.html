@@ -1,5 +1,6 @@
 <h1>Overview</h1>
 <h2>Limit Summary</h2>
+<div><p>Mail = {{userMail}}, Name = {{userName}}</p></div>
 <table class='computeCharts'>
         <tr>
         <td>
@@ -9,26 +10,26 @@
                     [colors]= "pieChartColors"
                     [chartType]="pieChartType"></canvas>
         </td>
-        
+
         <td>
             <canvas baseChart
                     [data]="pieChartData_instances"
                     [labels]="pieChartLabels"
-                    [colors]= "pieChartColors"  
+                    [colors]= "pieChartColors"
                     [chartType]="pieChartType"></canvas>
         </td>
         <td>
             <canvas baseChart
                     [data]="pieChartData_cores"
                     [labels]="pieChartLabels"
-                    [colors]= "pieChartColors"  
+                    [colors]= "pieChartColors"
                     [chartType]="pieChartType"></canvas>
         </td>
         <td>
             <canvas baseChart
                     [data]="pieChartData_ram"
                     [labels]="pieChartLabels"
-                    [colors]= "pieChartColors"  
+                    [colors]= "pieChartColors"
                     [chartType]="pieChartType"></canvas>
         </td>
         </tr>
@@ -47,5 +48,3 @@
             </td>
         </tr>
     </table>
-    
-
