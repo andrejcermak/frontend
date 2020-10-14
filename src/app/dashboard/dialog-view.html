@@ -78,13 +78,19 @@
         <div *ngIf="gotFIP">
             <p>You can access your instance at</p>
             <div>{{floatingIp.name}}</div>
+            <div *ngIf="isWindows">
+              <p> You can access your Windows instance at port 3389</p>
+              <p>Check
+                <a href="https://cloud.gitlab-pages.ics.muni.cz/documentation/windows/#licensing" target="_blank">https://cloud.gitlab-pages.ics.muni.cz/documentation/windows/#licensing</a>
+              </p>
+            </div>
         </div>
         <div *ngIf="!gotFIP">
             <p>Couldnt allocate FIP to instance</p>
             <div>
                 go to <a href="https://dashboard.cloud.muni.cz/project/floating_ips/" target="_blank">
                     https://dashboard.cloud.muni.cz/project/floating_ips/ </a>
-                and release some FIP, when done try to allocat FIP
+                and release some FIP, when done try to allocate FIP
             </div>
             <div class="close">
                 <button (click)="postFIP()">Allocate FIP</button>
