@@ -1,15 +1,17 @@
 <app-header></app-header>
 <div class="dashboard">
     <div>
-    
+
     </div>
     <div>
         <div>
-            <button (click)='openDialog()'>Bioconductor</button>
+            <button (click)='openDialog("bio")'>Bioconductor</button>
+            <button (click)='openDialog("win")'>Clean Windows</button>
+            <button (click)='openDialog("ubuntu")'>Clean Ubuntu</button>
         </div>
         <app-user-overview></app-user-overview>
-        
+
     </div>
-    
-</div>    
+
+</div>
 
