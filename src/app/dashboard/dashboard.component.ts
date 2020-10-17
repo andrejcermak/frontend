@@ -110,17 +110,17 @@ constructor(
     if (this.data.VolumeType === 'bio') {
       this.flavor = 'standard.2core-16ram';
       this.image = 'debian-9-x86_64_bioconductor';
-      this.ramLimit = 16;
+      this.ramLimit = 16384;
       this.isWindows = false;
     } else if (this.data.VolumeType === 'win') {
       this.flavor = 'standard.medium';
       this.image = 'windows-server-2019-standard-eval-x86_64';
-      this.ramLimit = 4;
+      this.ramLimit = 4096;
       this.isWindows = true;
     } else if (this.data.VolumeType === 'ubuntu') {
       this.flavor = 'standard.medium';
       this.image = 'ubuntu-focal-x86_64';
-      this.ramLimit = 4;
+      this.ramLimit = 4096;
       this.isWindows = false;
     }
 
@@ -246,6 +246,11 @@ constructor(
         this.goodRescources = false;
         this.isVisible = true;
         this.popupMessage += 'You dont have enough free RAM, you need ' + this.ramLimit + 'B free \n' ;
+      }
+      if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) < 1) {
+        this.goodRescources = false;
+        this.isVisible = true;
+        this.popupMessage = "You don't have any floating ips free, disassociate one in dashboard \n" ;
       }
     });
   }
