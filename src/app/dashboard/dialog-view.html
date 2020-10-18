@@ -2,6 +2,18 @@
     <mat-spinner style="margin:0 auto;">
     </mat-spinner>
 </div>
+<div *ngIf="!goodRescources">
+  <button (click)="close()" id="x">X</button>
+  <mat-dialog-content>
+<!--    <div>{{popupMessage}}</div>-->
+    <div [innerHTML]="popupMessage"></div>
+    <div>
+      Go to openstack and to do so<a href="https://dashboard.cloud.muni.cz/project/instances/"
+                                                        target="_blank">
+      https://dashboard.cloud.muni.cz/project/instances/ </a>
+    </div>
+  </mat-dialog-content>
+</div>
 <div *ngIf="!goodKeys">
     <button (click)="close()" id="x">X</button>
     <mat-dialog-content>
@@ -60,17 +72,6 @@
         <div mat-dialog-actions>
             <button (click)="onNoClick(name.value)">Create instance</button>
         </div>
-</div>
-<div *ngIf="!goodRescources">
-    <button (click)="close()" id="x">X</button>
-    <mat-dialog-content>
-        <div>{{popupMessage}}</div>
-        <div>
-            Go to openstack and clean unnecessary instances<a href="https://dashboard.cloud.muni.cz/project/instances/"
-                target="_blank">
-                https://dashboard.cloud.muni.cz/project/instances/ </a>
-        </div>
-    </mat-dialog-content>
 </div>
 <div *ngIf="showFIP">
     <button (click)="close()" id="x">X</button>
