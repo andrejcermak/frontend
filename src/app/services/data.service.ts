@@ -22,8 +22,8 @@ import { environment } from 'src/environments/environment';
 export class DataService {  //DataService takes care of all http requests and comunication with API
   private apiURL = environment.apiUrl;//"http://localhost:5000";
   private project_id:string;
-  private user_name:string;
-  private user_email:string;
+  // private user_name:string;
+  // private user_email:string;
 
 
 
@@ -38,11 +38,11 @@ export class DataService {  //DataService takes care of all http requests and co
     it will be automatically parsed from the JSON response
   */
 
-  getLimit (): Observable<Limit> {
+  getLimit(): Observable<Limit> {
       return this.httpClient.get<Limit>(this.apiURL+"/limits/");
   }
 
-  getNetwork (): Observable<Network[]> {
+  getNetwork(): Observable<Network[]> {
     return this.httpClient.get<Network[]>(this.apiURL+"/networks/");
   }
 
@@ -148,11 +148,13 @@ export class DataService {  //DataService takes care of all http requests and co
   */
 
   setUserName(name:string):void{
-    this.user_name=name;
+    console.log('username was set');
+    localStorage.setItem("userName", name);
   }
 
   getUserName():string{
-    return this.user_name;
+    return localStorage.getItem('userName');
+
   }
 
   setProjectId(id:string):void{
@@ -164,11 +166,12 @@ export class DataService {  //DataService takes care of all http requests and co
   }
 
   setUserEmail(mail:string):void{
-    this.user_email=mail;
+    localStorage.setItem("userEmail", mail);
   }
 
   getUserEmail():string{
-    return this.user_email;
+    return localStorage.getItem('userEmail');
+
   }
 
 
