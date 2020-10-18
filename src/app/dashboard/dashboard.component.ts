@@ -29,8 +29,6 @@ export class DialogData {
 })
 export class DashboardComponent implements OnInit {
   limits: Limit;
-
-
   constructor(private http: HttpClient, private dataService: DataService, private messageService: MessageService,
     public dialog: MatDialog) { }
 
@@ -104,9 +102,6 @@ constructor(
   }
 
   ngOnInit() {
-    this.checkRules();
-    this.checkRescources();
-    this.getSelectables();
     if (this.data.VolumeType === 'bio') {
       this.flavor = 'standard.2core-16ram';
       this.image = 'debian-9-x86_64_bioconductor';
@@ -123,6 +118,9 @@ constructor(
       this.ramLimit = 4096;
       this.isWindows = false;
     }
+    this.checkRescources();
+    this.checkRules();
+    this.getSelectables();
 
   }
   async delay(ms: number) {
@@ -230,27 +228,29 @@ constructor(
   }
 
   checkRescources(): void {
+  console.log('checking resources');
     this.dataService.getLimit().subscribe(data => {
       this.limit = data;
       if ((this.limit.cores.limit - this.limit.cores.used) < 2) {
         this.goodRescources = false;
-        this.isVisible = true;
-        this.popupMessage = 'You dont have free Cores, you need 2 cores free \n';
+        this.isVisible = false;
+        this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
       }
       if ((this.limit.instances.limit - this.limit.instances.used) < 1) {
         this.goodRescources = false;
-        this.isVisible = true;
-        this.popupMessage = 'You have too many Instances created \n';
+        this.isVisible = false;
+        this.popupMessage += 'You have too many Instances created. <br>';
       }
       if ((this.limit.ram.limit - this.limit.ram.used) < this.ramLimit) {
         this.goodRescources = false;
-        this.isVisible = true;
-        this.popupMessage += 'You dont have enough free RAM, you need ' + this.ramLimit + 'B free \n' ;
+        this.isVisible = false;
+        this.popupMessage += 'You don\'t have enough free RAM, you need ' + this.ramLimit + 'MB free. <br>' ;
       }
       if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) < 1) {
+        console.log('no fip');
         this.goodRescources = false;
-        this.isVisible = true;
-        this.popupMessage = "You don't have any floating ips free, disassociate one in dashboard \n" ;
+        this.isVisible = false;
+        this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
       }
     });
   }
@@ -283,7 +283,7 @@ constructor(
       this.delay(1500).then(any => {
         this.dataService.getInstance(this.instance.id).subscribe(
           data => {
-            this.instance = data
+            this.instance = data;
             this.postFIP();
           });
       })
