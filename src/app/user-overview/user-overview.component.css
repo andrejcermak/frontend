@@ -8,7 +8,9 @@ div.computeCharts{
     display: flex;
     flex-direction: row;
 }
-
+div.warning{
+  color: firebrick;
+}
 td{
     text-align: center;
 }

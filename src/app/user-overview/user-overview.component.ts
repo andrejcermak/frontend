@@ -18,8 +18,9 @@ export class UserOverviewComponent implements OnInit {
   public pieChartData_cores = [];
   public pieChartData_ram = [];
   public pieChartType = 'pie';
-  public userName:string;
-  public userMail:string;
+  public userName: string;
+  public userMail: string;
+  public missingUserCredentialsMessage: string;
   public pieChartColors: Array < any > = [{
     backgroundColor: ['#607D8B', 'rgba(148,159,177,0.2)'],
 
@@ -29,8 +30,13 @@ export class UserOverviewComponent implements OnInit {
 
   ngOnInit() {
     console.log("user mail and name: ", this.dataService.getUserEmail(), this.dataService.getUserName());
+    // console.log(this.dataService.user_name, this.dataService.getUserName());
     this.userName = this.dataService.getUserName();
     this.userMail = this.dataService.getUserEmail();
+    this.missingUserCredentialsMessage = '';
+    if (!(this.userName || this.userMail)) {
+      this.missingUserCredentialsMessage = 'WARNING, there was a problem loading your credentials, please contact admin.';
+    }
     this.dataService.getLimit().subscribe(
       data=> {
         this.limits = data;

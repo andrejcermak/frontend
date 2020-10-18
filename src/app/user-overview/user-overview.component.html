@@ -1,6 +1,8 @@
 <h1>Overview</h1>
 <h2>Limit Summary</h2>
-<div><p>Mail = {{userMail}}, Name = {{userName}}</p></div>
+<div *ngIf="!missingUserCredentialsMessage"><p>Mail = {{userMail}}, Name = {{userName}}</p></div>
+<div class='warning' *ngIf="missingUserCredentialsMessage"><p>{{missingUserCredentialsMessage}}</p></div>
+
 <table class='computeCharts'>
         <tr>
         <td>
