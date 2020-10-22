@@ -27,4 +27,16 @@ button {
     right: -20px;
     margin: 0;
   }
-  
+  .kill{
+    margin-top: 4px;
+    font-family: Arial;
+    background-color: red;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    cursor: hand;
+  }
+  .kill:hover{
+    background-color: darkred;
+  }
