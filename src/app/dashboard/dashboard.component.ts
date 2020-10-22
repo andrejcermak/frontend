@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DataService } from '../services/data.service';
 import { Limit } from '../models/limit'
@@ -12,6 +13,7 @@ import { MetaData } from '../models/metadata';
 import { Inject } from '@angular/core';
 import { FIP } from '../models/floating_ips';
 import { Instance } from '../models/instance';
+import { UserOverviewComponent } from '../user-overview/user-overview.component'
 
 
 export class DialogData {
@@ -27,15 +29,22 @@ export class DialogData {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit{
   limits: Limit;
   constructor(private http: HttpClient, private dataService: DataService, private messageService: MessageService,
     public dialog: MatDialog) { }
 
+  @ViewChild(UserOverviewComponent)  //ViewChild so that parent can call childs methods
+  private userOverviewCOmponent: UserOverviewComponent 
+     
   ngOnInit() {
   }
 
 
+  reload() {
+    this.userOverviewCOmponent.clear();
+    this.userOverviewCOmponent.ngOnInit();
+  }
 
   async delay(ms: number) {
     await new Promise(resolve => setTimeout(() => resolve(), ms)).then(() => console.log("fired"));
@@ -52,6 +61,7 @@ export class DashboardComponent implements OnInit {
     });
 
     dialogRef.afterClosed().subscribe(result => {
+      this.reload();
       console.log('The dialog was closed');
     });
   }
