@@ -40,7 +40,6 @@ export class UserOverviewComponent implements OnInit {
     this.dataService.getLimit().subscribe(
       data=> {
         this.limits = data;
-
         this.pieChartData_floating.push(this.limits.floating_ips.used);
         this.pieChartData_floating.push(this.limits.floating_ips.limit-this.limits.floating_ips.used);
 
@@ -52,14 +51,27 @@ export class UserOverviewComponent implements OnInit {
 
         this.pieChartData_ram.push(this.limits.ram.used);
         this.pieChartData_ram.push(this.limits.ram.limit-this.limits.ram.used);
-
       },
       //err=>{this.messageService.add("Http Error => "+JSON.stringify(err));
       //}
+
     )
 
-
-
+  }
+  refresh():void {
+    this.pieChartData_floating.length = 0;
+    this.pieChartData_instances.length = 0;
+    this.pieChartData_cores.length = 0;
+    this.pieChartData_ram.length = 0;
+    this.dataService.getLimit().subscribe(
+      data=> {
+        this.limits = data;
+        console.log("triyng to refresh ");
+        console.log(this.limits);
+        this.pieChartData_floating.push(13);
+        this.pieChartData_floating.push(20);
+      }
+    );
   }
 
 
