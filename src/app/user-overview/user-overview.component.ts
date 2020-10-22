@@ -54,12 +54,14 @@ export class UserOverviewComponent implements OnInit {
         this.pieChartData_ram.push(this.limits.ram.limit-this.limits.ram.used);
 
       },
-      //err=>{this.messageService.add("Http Error => "+JSON.stringify(err));
-      //}
     )
+  }
 
-
-
+  clear(){
+    this.pieChartData_floating = [];
+    this.pieChartData_instances = [];
+    this.pieChartData_cores = [];
+    this.pieChartData_ram = [];  
   }
 
 
