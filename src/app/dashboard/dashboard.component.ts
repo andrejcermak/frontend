@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { DataService } from '../services/data.service';
-import { Limit } from '../models/limit'
+import { Limit } from '../models/limit';
 import { Keypair } from '../models/key_pair';
 import { Network } from '../models/network';
 import { SecurityGroup } from '../models/security_groups'
@@ -13,8 +13,8 @@ import { MetaData } from '../models/metadata';
 import { Inject } from '@angular/core';
 import { FIP } from '../models/floating_ips';
 import { Instance } from '../models/instance';
-import { UserOverviewComponent } from '../user-overview/user-overview.component'
 
+import { UserOverviewComponent } from '../user-overview/user-overview.component'
 
 export class DialogData {
   //private keys: Keypair[];
@@ -32,7 +32,7 @@ export class DialogData {
 export class DashboardComponent implements OnInit{
   limits: Limit;
   constructor(private http: HttpClient, private dataService: DataService, private messageService: MessageService,
-    public dialog: MatDialog) { }
+              public dialog: MatDialog, public userOverview: UserOverviewComponent) { }
 
   @ViewChild(UserOverviewComponent)  //ViewChild so that parent can call childs methods
   private userOverviewCOmponent: UserOverviewComponent 
@@ -63,6 +63,7 @@ export class DashboardComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.reload();
       console.log('The dialog was closed');
+      this.userOverview.refresh();
     });
   }
 }
@@ -94,7 +95,7 @@ export class Dialogview {
   public popupMessage: string = "";
   public privateKey: string;
   public goodKeys: boolean = true;
-  public goodRescources: boolean = true;
+
   public showFIP: boolean = false;
   public gotFIP: boolean = true;
   public isWindows: boolean;
@@ -102,12 +103,16 @@ export class Dialogview {
   public floatingIp: FIP;
   public fipNetwork: Network;
   public instance: Instance;
+  public instances: Instance[];
   public ramLimit;
   public flavor: string;
   public image: string;
+  public canAssignIP: boolean = true;
+  public canCreateMachine: boolean = true;
 
 constructor(
-    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
+    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService,
+    public userOverview: UserOverviewComponent) {
     dialogRef.disableClose = true;
   }
 
@@ -131,12 +136,25 @@ constructor(
     this.checkRescources();
     this.checkRules();
     this.getSelectables();
-
+    console.log("everything checked");
   }
   async delay(ms: number) {
     await new Promise(resolve => setTimeout(() => resolve(), ms)).then();
   }
-
+  getMachines(): void {
+    this.dataService.getInstances().subscribe(
+      data => {
+        this.instances = data;
+      }
+    );
+  }
+  getFIPS(): void {
+    this.dataService.getFloatingIPS().subscribe(
+      data => {
+        this.floatingIPs = data;
+      }
+    );
+  }
 
   getSelectables(): void {  //sets up ssh keys and networks to be displayed in form fields
 
@@ -152,6 +170,8 @@ constructor(
           }
         }
         this.getKeys();
+        this.getFIPS();
+        this.getMachines();
       },
       err => {
 
@@ -238,27 +258,29 @@ constructor(
   }
 
   checkRescources(): void {
+  this.canAssignIP = true;
+  this.canCreateMachine = true;
   console.log('checking resources');
     this.dataService.getLimit().subscribe(data => {
       this.limit = data;
       if ((this.limit.cores.limit - this.limit.cores.used) < 2) {
-        this.goodRescources = false;
+        this.canCreateMachine = false;
         this.isVisible = false;
         this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
       }
       if ((this.limit.instances.limit - this.limit.instances.used) < 1) {
-        this.goodRescources = false;
+        this.canCreateMachine = false;
         this.isVisible = false;
         this.popupMessage += 'You have too many Instances created. <br>';
       }
       if ((this.limit.ram.limit - this.limit.ram.used) < this.ramLimit) {
-        this.goodRescources = false;
+        this.canCreateMachine = false;
         this.isVisible = false;
         this.popupMessage += 'You don\'t have enough free RAM, you need ' + this.ramLimit + 'MB free. <br>' ;
       }
       if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) < 1) {
         console.log('no fip');
-        this.goodRescources = false;
+        this.canAssignIP = false;
         this.isVisible = false;
         this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
       }
@@ -281,6 +303,7 @@ constructor(
 
       this.instance = data;
       this.postFIP();
+
     });
 
   }
@@ -312,20 +335,45 @@ constructor(
           this.gotFIP = false;
 
         });
+      this.userOverview.ngOnInit();
+      console.log("ng on init user overview called");
     }
-
+  // TODO pridat refresh po tejto akcii na limits
   };
 
   continueToMain(): void {
+    console.log("continue to main");
     this.goodKeys = true;
     this.getSelectables();
   }
-
   close(): void {
     this.dialogRef.close();
   }
 
-
+  killMachine(id): void {
+    this.dataService.deleteInstance(id).subscribe(
+      data => {
+        console.log("deleted");
+      }
+    );
+    this.helper(this.instances.length);
+  }
+  helper(count): void {
+    this.dataService.getInstances().subscribe(
+      data => {
+        this.instances = data;
+      }
+    );
+    if (count === this.instances.length){
+      this.delay(1500).then( any => {
+        this.helper(count);
+      });
+    } else {
+      console.log("deleted");
+      this.checkRescources();
+      this.ngOnInit();
+    }
+  }
 }
 
 

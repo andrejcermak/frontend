@@ -38,6 +38,15 @@ export class DataService {  //DataService takes care of all http requests and co
     it will be automatically parsed from the JSON response
   */
 
+  deleteInstance(id): Observable<Instance> {
+    console.log("killing machine");
+    return this.httpClient.delete<Instance>(this.apiURL + "/instances/" + id + "/");
+  }
+  deleteFloatingIP(ip) {
+    return this.httpClient.delete(this.apiURL + "/floating_ips/" + ip + "ip");
+  }
+
+
   getLimit(): Observable<Limit> {
       return this.httpClient.get<Limit>(this.apiURL+"/limits/");
   }
@@ -173,7 +182,5 @@ export class DataService {  //DataService takes care of all http requests and co
     return localStorage.getItem('userEmail');
 
   }
-
-
 
 }

@@ -2,21 +2,9 @@
     <mat-spinner style="margin:0 auto;">
     </mat-spinner>
 </div>
-<div *ngIf="!goodRescources">
+<div *ngIf="!goodKeys">
   <button (click)="close()" id="x">X</button>
   <mat-dialog-content>
-<!--    <div>{{popupMessage}}</div>-->
-    <div [innerHTML]="popupMessage"></div>
-    <div>
-      Go to openstack and to do so<a href="https://dashboard.cloud.muni.cz/project/instances/"
-                                                        target="_blank">
-      https://dashboard.cloud.muni.cz/project/instances/ </a>
-    </div>
-  </mat-dialog-content>
-</div>
-<div *ngIf="!goodKeys">
-    <button (click)="close()" id="x">X</button>
-    <mat-dialog-content>
         <p>You dont have ssh keys</p>
         <p>Go to <a href="https://dashboard.cloud.muni.cz/project/key_pairs" target="_blank">
                 https://dashboard.cloud.muni.cz/project/key_pairs </a> to import or create your key</p>
@@ -37,23 +25,23 @@
         </div>
     </mat-dialog-content>
 </div>
-<div *ngIf="isVisible && goodKeys && goodRescources && !showFIP">
-    <button (click)="close()" id="x">X</button>
-        <div>
-            <mat-form-field appearance="outline">
+<div *ngIf="isVisible && goodKeys && canAssignIP &&  canCreateMachine && !showFIP">
+  <button (click)="close()" id="x">X</button>
+  <div>
+    <mat-form-field appearance="outline">
                 <mat-label>Instance Name</mat-label>
                 <input matInput placeholder="" #name>
             </mat-form-field>
-        </div>
-        <div>
-            <mat-form-field>
+  </div>
+  <div>
+    <mat-form-field>
                 <label>Key</label>
                 <mat-select matNativeControl [(ngModel)]="selectedKey" name="key">
                     <mat-option *ngFor="let key of this.keys" [value]="key.name">{{key.name}}</mat-option>
                 </mat-select>
             </mat-form-field>
-        </div>
-        <table>
+  </div>
+  <table>
             <tr>
                 <td>
                     <mat-form-field>
@@ -69,13 +57,14 @@
                 </td>
             </tr>
         </table>
-        <div mat-dialog-actions>
-            <button (click)="onNoClick(name.value)">Create instance</button>
-        </div>
+  <div mat-dialog-actions>
+    <button (click)="onNoClick(name.value)">Create instance</button>
+  </div>
 </div>
+
 <div *ngIf="showFIP">
-    <button (click)="close()" id="x">X</button>
-    <mat-dialog-content>
+  <button (click)="close()" id="x">X</button>
+  <mat-dialog-content>
         <div *ngIf="gotFIP">
             <p>You can access your instance at</p>
             <div>{{floatingIp.name}}</div>
@@ -98,4 +87,42 @@
             </div>
         </div>
     </mat-dialog-content>
+</div>
+<div *ngIf="!canCreateMachine || !canAssignIP">
+  <button (click)="close()" id="x">X</button>
+  <div *ngIf="!canCreateMachine ">
+    <mat-dialog-content>
+      <label>Your machines</label>
+      <table>
+        <tr *ngFor="let instance of instances">
+          <td>
+            <p>{{instance.name}}</p>
+          </td>
+          <td>
+            <button (click)="killMachine(instance.id)" class="kill">kill</button>
+          </td>
+        </tr>
+      </table>
+    </mat-dialog-content>
+  </div>
+
+  <div *ngIf="!canAssignIP ">
+    <mat-dialog-content>
+      <div *ngIf="(limit.floating_ips.limit - limit.floating_ips.used) < 1">
+        <label>Your floating ips</label>
+        <table>
+          <tr *ngFor="let fip of floatingIPs">
+            <td>
+              <p>{{fip.name}}</p>
+            </td>
+            <td>
+              <button (click)="killMachine()" class="kill">disassociate</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </mat-dialog-content>
+  </div>
+
+
 </div>

@@ -40,7 +40,6 @@ export class UserOverviewComponent implements OnInit {
     this.dataService.getLimit().subscribe(
       data=> {
         this.limits = data;
-
         this.pieChartData_floating.push(this.limits.floating_ips.used);
         this.pieChartData_floating.push(this.limits.floating_ips.limit-this.limits.floating_ips.used);
 
@@ -52,17 +51,14 @@ export class UserOverviewComponent implements OnInit {
 
         this.pieChartData_ram.push(this.limits.ram.used);
         this.pieChartData_ram.push(this.limits.ram.limit-this.limits.ram.used);
-
       },
+
     )
   }
-
   clear(){
     this.pieChartData_floating = [];
     this.pieChartData_instances = [];
     this.pieChartData_cores = [];
     this.pieChartData_ram = [];  
   }
-
-
 }
