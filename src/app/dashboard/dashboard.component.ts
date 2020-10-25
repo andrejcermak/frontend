@@ -32,11 +32,11 @@ export class DialogData {
 export class DashboardComponent implements OnInit{
   limits: Limit;
   constructor(private http: HttpClient, private dataService: DataService, private messageService: MessageService,
-              public dialog: MatDialog, public userOverview: UserOverviewComponent) { }
+              public dialog: MatDialog) { }
 
   @ViewChild(UserOverviewComponent)  //ViewChild so that parent can call childs methods
-  private userOverviewCOmponent: UserOverviewComponent 
-     
+  private userOverviewCOmponent: UserOverviewComponent;
+
   ngOnInit() {
   }
 
@@ -63,7 +63,6 @@ export class DashboardComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.reload();
       console.log('The dialog was closed');
-      this.userOverview.refresh();
     });
   }
 }
@@ -111,8 +110,7 @@ export class Dialogview {
   public canCreateMachine: boolean = true;
 
 constructor(
-    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService,
-    public userOverview: UserOverviewComponent) {
+    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
     dialogRef.disableClose = true;
   }
 
@@ -335,7 +333,7 @@ constructor(
           this.gotFIP = false;
 
         });
-      this.userOverview.ngOnInit();
+
       console.log("ng on init user overview called");
     }
   // TODO pridat refresh po tejto akcii na limits
@@ -349,16 +347,40 @@ constructor(
   close(): void {
     this.dialogRef.close();
   }
-
+  disassociateFIP(ip): void{
+    console.log(ip);
+    this.dataService.deleteFloatingIP(ip).subscribe(
+      data => {
+        console.log("disassociating fip");
+      }
+    );
+    this.disassociateFIPHelper(this.limit.floating_ips.used);
+  }
+  disassociateFIPHelper(count): void{
+    this.dataService.getLimit().subscribe(
+      data => {
+        this.limit = data;
+      }
+    );
+    if (count === this.limit.floating_ips.used){
+      this.delay(1500).then( any => {
+        this.disassociateFIPHelper(count);
+      });
+    } else {
+      console.log("deleted");
+      this.checkRescources();
+      this.ngOnInit();
+    }
+  }
   killMachine(id): void {
     this.dataService.deleteInstance(id).subscribe(
       data => {
-        console.log("deleted");
+        console.log("deleting machine");
       }
     );
-    this.helper(this.instances.length);
+    this.killMachineHelper(this.instances.length);
   }
-  helper(count): void {
+  killMachineHelper(count): void {
     this.dataService.getInstances().subscribe(
       data => {
         this.instances = data;
@@ -366,7 +388,7 @@ constructor(
     );
     if (count === this.instances.length){
       this.delay(1500).then( any => {
-        this.helper(count);
+        this.killMachineHelper(count);
       });
     } else {
       console.log("deleted");
