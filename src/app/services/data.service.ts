@@ -43,7 +43,7 @@ export class DataService {  //DataService takes care of all http requests and co
     return this.httpClient.delete<Instance>(this.apiURL + "/instances/" + id + "/");
   }
   deleteFloatingIP(ip) {
-    return this.httpClient.delete(this.apiURL + "/floating_ips/" + ip + "ip");
+    return this.httpClient.delete(this.apiURL + "/floating_ips/" + ip + "/");
   }
 
 
@@ -90,7 +90,7 @@ export class DataService {  //DataService takes care of all http requests and co
 
 
   postInstance(instanceData:InstanceData):Observable<Instance>{
-    return this.httpClient.post<Instance>(this.apiURL+"/instances/",instanceData);
+    return this.httpClient.post<Instance>(this.apiURL+"/instances/", instanceData);
   }
 
   postKeyPairs(name:string):Observable<Keypair>{
