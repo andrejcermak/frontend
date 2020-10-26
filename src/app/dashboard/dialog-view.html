@@ -1,6 +1,7 @@
 <div *ngIf="!isVisible" class="spinner">
     <mat-spinner style="margin:0 auto;">
     </mat-spinner>
+  <div>{{message}}</div>
 </div>
 
 <div *ngIf="!goodKeys">
@@ -95,21 +96,21 @@
   <button (click)="close()" id="x">X</button>
   <div *ngIf="!canCreateMachine ">
     <mat-dialog-content>
+      <div *ngIf=" ramLimit > (limit.ram.limit-limit.ram.used)">
+        You need {{ramLimit}}MB of ram, you have {{(limit.ram.limit-limit.ram.used)}}MB left</div>
+      <div *ngIf="2 > (limit.cores.limit-limit.cores.used)">
+        You need 2 cpu cores, you have {{(limit.cores.limit-limit.cores.used)}}left</div>
+      <div *ngIf="ramLimit > (limit.ram.limit-limit.ram.used) || 2 > (limit.cores.limit-limit.cores.used) ">
+        Please kill some of your machines
+      </div>
       <label>Your machines</label>
+      <div></div>
       <table>
         <tr *ngFor="let instance of instances">
-          <td>
-            <p>{{instance.name}}</p>
-          </td>
-          <td>
-            <p>CPUS used: {{instance.flavor["vcpus"]}}</p>
-          </td>
-          <td>
-            <p>RAM used: {{instance.flavor["ram"]}}</p>
-          </td>
-          <td>
-            <button (click)="killMachine(instance.id)" class="kill">kill</button>
-          </td>
+          <td>Machine name: {{instance.name}}</td>
+          <td>CPUS used: {{instance.flavor["vcpus"]}}</td>
+          <td>RAM used: {{instance.flavor["ram"]}}MB</td>
+          <td><button (click)="killMachine(instance.id)" class="kill">kill</button></td>
         </tr>
       </table>
     </mat-dialog-content>
@@ -118,7 +119,8 @@
   <div *ngIf="!canAssignIP ">
     <mat-dialog-content>
       <div *ngIf="(limit.floating_ips.limit - limit.floating_ips.used) < 1">
-        <label>Your floating ips</label>
+        <div>You have no free floating ip left. Please disassociate at least 1 of them</div>
+        <label>Your floating ips:</label>
         <table>
           <tr *ngFor="let fip of floatingIPs">
             <td>
