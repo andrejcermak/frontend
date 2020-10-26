@@ -106,8 +106,8 @@ export class Dialogview {
   public ramLimit;
   public flavor: string;
   public image: string;
-  public canAssignIP: boolean = true;
-  public canCreateMachine: boolean = true;
+  public canAssignIP: boolean;
+  public canCreateMachine: boolean;
 
 constructor(
     public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
@@ -131,6 +131,7 @@ constructor(
       this.ramLimit = 4096;
       this.isWindows = false;
     }
+
     this.checkRescources();
     this.checkRules();
     this.getSelectables();
@@ -146,6 +147,7 @@ constructor(
       }
     );
   }
+
   getFIPS(): void {
     this.dataService.getFloatingIPS().subscribe(
       data => {
@@ -241,11 +243,11 @@ constructor(
 
   checkKeys(): void {
     if (this.keys.length == 0) {
-      this.isVisible = true;
+      // this.isVisible = true;
       this.goodKeys = false;
     } else {
       this.goodKeys = true;
-      this.isVisible = true;
+      // this.isVisible = true;
     }
   }
 
@@ -256,33 +258,27 @@ constructor(
   }
 
   checkRescources(): void {
-  this.canAssignIP = true;
-  this.canCreateMachine = true;
+  this.canAssignIP = false;
+  this.canCreateMachine = false;
+  this.isVisible = false;
   console.log('checking resources');
-    this.dataService.getLimit().subscribe(data => {
-      this.limit = data;
-      if ((this.limit.cores.limit - this.limit.cores.used) < 2) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
-      }
-      if ((this.limit.instances.limit - this.limit.instances.used) < 1) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You have too many Instances created. <br>';
-      }
-      if ((this.limit.ram.limit - this.limit.ram.used) < this.ramLimit) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have enough free RAM, you need ' + this.ramLimit + 'MB free. <br>' ;
-      }
-      if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) < 1) {
-        console.log('no fip');
-        this.canAssignIP = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
-      }
-    });
+  this.dataService.getLimit().subscribe(data => {
+    this.limit = data;
+    if ((this.limit.cores.limit - this.limit.cores.used) >= 2
+      && (this.limit.instances.limit - this.limit.instances.used) >= 1
+      && (this.limit.ram.limit - this.limit.ram.used) >= this.ramLimit) {
+      this.canCreateMachine = true;
+      // this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
+    }else{
+
+    }
+    if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) >= 1) {
+      this.canAssignIP = true;
+      // this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
+    }
+  });
+  console.log(this.isVisible, this.canAssignIP, this.canCreateMachine);
+  this.isVisible = true;
   }
 
 
@@ -322,13 +318,13 @@ constructor(
       this.dataService.postFloatinIp(this.instance.id, this.fipNetwork.id).subscribe(
         data => {
           console.log(JSON.stringify(data));
-          this.isVisible = true;
+          // this.isVisible = true;
           this.floatingIp = data;
           this.showFIP = true;
 
         }, err => {
           console.log(err);
-          this.isVisible = true;
+          // this.isVisible = true;
           this.showFIP = true;
           this.gotFIP = false;
 
@@ -348,6 +344,7 @@ constructor(
     this.dialogRef.close();
   }
   disassociateFIP(ip): void{
+    this.isVisible = false;
     console.log(ip);
     this.dataService.deleteFloatingIP(ip).subscribe(
       data => {
@@ -368,11 +365,11 @@ constructor(
       });
     } else {
       console.log("deleted");
-      this.checkRescources();
       this.ngOnInit();
     }
   }
   killMachine(id): void {
+    this.isVisible = false;
     this.dataService.deleteInstance(id).subscribe(
       data => {
         console.log("deleting machine");
@@ -392,7 +389,6 @@ constructor(
       });
     } else {
       console.log("deleted");
-      this.checkRescources();
       this.ngOnInit();
     }
   }

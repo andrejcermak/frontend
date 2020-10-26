@@ -2,6 +2,7 @@
     <mat-spinner style="margin:0 auto;">
     </mat-spinner>
 </div>
+
 <div *ngIf="!goodKeys">
   <button (click)="close()" id="x">X</button>
   <mat-dialog-content>
@@ -25,6 +26,7 @@
         </div>
     </mat-dialog-content>
 </div>
+
 <div *ngIf="isVisible && goodKeys && canAssignIP &&  canCreateMachine && !showFIP">
   <button (click)="close()" id="x">X</button>
   <div>
@@ -88,7 +90,8 @@
         </div>
     </mat-dialog-content>
 </div>
-<div *ngIf="!canCreateMachine || !canAssignIP">
+
+<div *ngIf="isVisible && (!canCreateMachine || !canAssignIP)">
   <button (click)="close()" id="x">X</button>
   <div *ngIf="!canCreateMachine ">
     <mat-dialog-content>
@@ -97,6 +100,12 @@
         <tr *ngFor="let instance of instances">
           <td>
             <p>{{instance.name}}</p>
+          </td>
+          <td>
+            <p>CPUS used: {{instance.flavor["vcpus"]}}</p>
+          </td>
+          <td>
+            <p>RAM used: {{instance.flavor["ram"]}}</p>
           </td>
           <td>
             <button (click)="killMachine(instance.id)" class="kill">kill</button>
