@@ -108,7 +108,7 @@ export class Dialogview {
   public image: string;
   public canAssignIP: boolean;
   public canCreateMachine: boolean;
-
+  public message: string;
 constructor(
     public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
     dialogRef.disableClose = true;
@@ -131,7 +131,7 @@ constructor(
       this.ramLimit = 4096;
       this.isWindows = false;
     }
-
+    this.message = 'Loading';
     this.checkRescources();
     this.checkRules();
     this.getSelectables();
@@ -176,7 +176,7 @@ constructor(
       err => {
 
       }
-    )
+    );
   }
 
   getKeys(): void {
@@ -269,23 +269,21 @@ constructor(
       && (this.limit.ram.limit - this.limit.ram.used) >= this.ramLimit) {
       this.canCreateMachine = true;
       // this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
-    }else{
-
     }
     if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) >= 1) {
       this.canAssignIP = true;
       // this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
     }
+    this.isVisible = true;
+    console.log(this.isVisible, this.canAssignIP, this.canCreateMachine);
   });
-  console.log(this.isVisible, this.canAssignIP, this.canCreateMachine);
-  this.isVisible = true;
   }
 
 
   onNoClick(name: string): void {
     var usr_name = this.dataService.getUserName();
     var usr_mail = this.dataService.getUserEmail();
-
+    this.message = 'Creating your instance';
     this.isVisible = false;
     this.metaData = { Bioclass_user: usr_name, Bioclass_email: usr_mail };
     console.log(this.metaData);
@@ -321,12 +319,13 @@ constructor(
           // this.isVisible = true;
           this.floatingIp = data;
           this.showFIP = true;
-
+          this.isVisible = true;
         }, err => {
           console.log(err);
           // this.isVisible = true;
           this.showFIP = true;
           this.gotFIP = false;
+          this.isVisible = true;
 
         });
 
@@ -344,6 +343,7 @@ constructor(
     this.dialogRef.close();
   }
   disassociateFIP(ip): void{
+    this.message = 'Disassociating your FIP';
     this.isVisible = false;
     console.log(ip);
     this.dataService.deleteFloatingIP(ip).subscribe(
@@ -369,6 +369,7 @@ constructor(
     }
   }
   killMachine(id): void {
+    this.message = 'Killing your machine';
     this.isVisible = false;
     this.dataService.deleteInstance(id).subscribe(
       data => {
