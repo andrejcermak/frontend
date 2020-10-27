@@ -3,4 +3,5 @@ export class Instance{
     id: string;
     status:string;
     flavor: {};
+    image: {};
 }
