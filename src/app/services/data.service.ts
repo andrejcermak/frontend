@@ -14,6 +14,8 @@ import { CookieService} from 'ngx-cookie-service';
 import { Router } from '@angular/router';
 import { SecurityGroup } from "../models/security_groups";
 import { FIP } from '../models/floating_ips';
+import {Image} from '../models/image';
+
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -46,6 +48,13 @@ export class DataService {  //DataService takes care of all http requests and co
     return this.httpClient.delete(this.apiURL + "/floating_ips/" + ip + "/");
   }
 
+  getImage(id: string): Observable<Image>{
+    return this.httpClient.get<Image>(this.apiURL + '/images/' + id + '/');
+  }
+
+  getImages(): Observable<Image[]>{
+    return this.httpClient.get<Image[]>(this.apiURL + '/images/');
+  }
 
   getLimit(): Observable<Limit> {
       return this.httpClient.get<Limit>(this.apiURL+"/limits/");
