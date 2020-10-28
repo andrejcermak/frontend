@@ -105,14 +105,7 @@
       </div>
       <label>Your machines</label>
       <div></div>
-      <table>
-        <tr *ngFor="let instance of instances">
-          <td>Machine name: {{instance.name}}</td>
-          <td>CPUS used: {{instance.flavor["vcpus"]}}</td>
-          <td>RAM used: {{instance.flavor["ram"]}}MB</td>
-          <td><button (click)="killMachine(instance.id)" class="kill">kill</button></td>
-        </tr>
-      </table>
+      <app-instance-table [hasKillButtons]=true (toBeKilled)="killMachine($event)" ></app-instance-table>
     </mat-dialog-content>
   </div>
 
@@ -132,6 +125,7 @@
           </tr>
         </table>
       </div>
+      <app-instance-table [hasKillButtons]=true (toBeKilled)="killMachine($event)"></app-instance-table>
     </mat-dialog-content>
   </div>
 
