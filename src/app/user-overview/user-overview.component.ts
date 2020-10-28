@@ -12,7 +12,7 @@ import { MessageService } from '../services/message.service';
 export class UserOverviewComponent implements OnInit {
   private limits:Limit;
 
-  public pieChartLabels = ['Used','Limit'];
+  public pieChartLabels = ['Used', 'Free'];
   public pieChartData_floating = [];
   public pieChartData_instances = [];
   public pieChartData_cores = [];
@@ -38,27 +38,27 @@ export class UserOverviewComponent implements OnInit {
       this.missingUserCredentialsMessage = 'WARNING, there was a problem loading your credentials, please contact admin.';
     }
     this.dataService.getLimit().subscribe(
-      data=> {
+      data => {
         this.limits = data;
         this.pieChartData_floating.push(this.limits.floating_ips.used);
-        this.pieChartData_floating.push(this.limits.floating_ips.limit-this.limits.floating_ips.used);
+        this.pieChartData_floating.push(this.limits.floating_ips.limit - this.limits.floating_ips.used);
 
         this.pieChartData_instances.push(this.limits.instances.used);
-        this.pieChartData_instances.push(this.limits.instances.limit-this.limits.instances.used);
+        this.pieChartData_instances.push(this.limits.instances.limit - this.limits.instances.used);
 
         this.pieChartData_cores.push(this.limits.cores.used);
-        this.pieChartData_cores.push(this.limits.cores.limit-this.limits.cores.used);
+        this.pieChartData_cores.push(this.limits.cores.limit - this.limits.cores.used);
 
         this.pieChartData_ram.push(this.limits.ram.used);
-        this.pieChartData_ram.push(this.limits.ram.limit-this.limits.ram.used);
+        this.pieChartData_ram.push(this.limits.ram.limit - this.limits.ram.used);
       },
 
-    )
+    );
   }
   clear(){
     this.pieChartData_floating = [];
     this.pieChartData_instances = [];
     this.pieChartData_cores = [];
-    this.pieChartData_ram = [];  
+    this.pieChartData_ram = [];
   }
 }
