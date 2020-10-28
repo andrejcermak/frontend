@@ -1,4 +1,4 @@
-<table *ngIf="countAssigned == instances.length">
+<table *ngIf="ready">
   <tr *ngFor="let instance of instances">
     <td>Machine name: {{instance.name}}</td>
     <td>CPUS used: {{instance.flavor["vcpus"]}}</td>
