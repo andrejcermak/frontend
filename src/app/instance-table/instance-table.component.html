@@ -1,0 +1,9 @@
+<table *ngIf="ready">
+  <tr *ngFor="let instance of instances">
+    <td>Machine name: {{instance.name}}</td>
+    <td>CPUS used: {{instance.flavor["vcpus"]}}</td>
+    <td>RAM used: {{instance.flavor["ram"]}}MB</td>
+    <td>Image: {{instance.image.name}}</td>
+    <td *ngIf="hasKillButtons"><button (click)="kill(instance.id)" class="kill">kill</button></td>
+  </tr>
+</table>

@@ -32,11 +32,11 @@ export class DialogData {
 export class DashboardComponent implements OnInit{
   limits: Limit;
   constructor(private http: HttpClient, private dataService: DataService, private messageService: MessageService,
-              public dialog: MatDialog, public userOverview: UserOverviewComponent) { }
+              public dialog: MatDialog) { }
 
   @ViewChild(UserOverviewComponent)  //ViewChild so that parent can call childs methods
-  private userOverviewCOmponent: UserOverviewComponent 
-     
+  private userOverviewCOmponent: UserOverviewComponent;
+
   ngOnInit() {
   }
 
@@ -63,7 +63,6 @@ export class DashboardComponent implements OnInit{
     dialogRef.afterClosed().subscribe(result => {
       this.reload();
       console.log('The dialog was closed');
-      this.userOverview.refresh();
     });
   }
 }
@@ -107,12 +106,11 @@ export class Dialogview {
   public ramLimit;
   public flavor: string;
   public image: string;
-  public canAssignIP: boolean = true;
-  public canCreateMachine: boolean = true;
-
+  public canAssignIP: boolean;
+  public canCreateMachine: boolean;
+  public message: string;
 constructor(
-    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService,
-    public userOverview: UserOverviewComponent) {
+    public dialogRef: MatDialogRef<Dialogview>, @Inject(MAT_DIALOG_DATA) public data: DialogData, private dataService: DataService) {
     dialogRef.disableClose = true;
   }
 
@@ -133,6 +131,7 @@ constructor(
       this.ramLimit = 4096;
       this.isWindows = false;
     }
+    this.message = 'Loading';
     this.checkRescources();
     this.checkRules();
     this.getSelectables();
@@ -148,6 +147,7 @@ constructor(
       }
     );
   }
+
   getFIPS(): void {
     this.dataService.getFloatingIPS().subscribe(
       data => {
@@ -176,7 +176,7 @@ constructor(
       err => {
 
       }
-    )
+    );
   }
 
   getKeys(): void {
@@ -243,11 +243,11 @@ constructor(
 
   checkKeys(): void {
     if (this.keys.length == 0) {
-      this.isVisible = true;
+      // this.isVisible = true;
       this.goodKeys = false;
     } else {
       this.goodKeys = true;
-      this.isVisible = true;
+      // this.isVisible = true;
     }
   }
 
@@ -258,40 +258,32 @@ constructor(
   }
 
   checkRescources(): void {
-  this.canAssignIP = true;
-  this.canCreateMachine = true;
+  this.canAssignIP = false;
+  this.canCreateMachine = false;
+  this.isVisible = false;
   console.log('checking resources');
-    this.dataService.getLimit().subscribe(data => {
-      this.limit = data;
-      if ((this.limit.cores.limit - this.limit.cores.used) < 2) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
-      }
-      if ((this.limit.instances.limit - this.limit.instances.used) < 1) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You have too many Instances created. <br>';
-      }
-      if ((this.limit.ram.limit - this.limit.ram.used) < this.ramLimit) {
-        this.canCreateMachine = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have enough free RAM, you need ' + this.ramLimit + 'MB free. <br>' ;
-      }
-      if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) < 1) {
-        console.log('no fip');
-        this.canAssignIP = false;
-        this.isVisible = false;
-        this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
-      }
-    });
+  this.dataService.getLimit().subscribe(data => {
+    this.limit = data;
+    if ((this.limit.cores.limit - this.limit.cores.used) >= 2
+      && (this.limit.instances.limit - this.limit.instances.used) >= 1
+      && (this.limit.ram.limit - this.limit.ram.used) >= this.ramLimit) {
+      this.canCreateMachine = true;
+      // this.popupMessage += 'You don\'t have free cpu, you need free 2 cores. <br>';
+    }
+    if ((this.limit.floating_ips.limit - this.limit.floating_ips.used) >= 1) {
+      this.canAssignIP = true;
+      // this.popupMessage += 'You don\'t have any floating ips free, disassociate one in dashboard. <br>' ;
+    }
+    this.isVisible = true;
+    console.log(this.isVisible, this.canAssignIP, this.canCreateMachine);
+  });
   }
 
 
   onNoClick(name: string): void {
     var usr_name = this.dataService.getUserName();
     var usr_mail = this.dataService.getUserEmail();
-
+    this.message = 'Creating your instance';
     this.isVisible = false;
     this.metaData = { Bioclass_user: usr_name, Bioclass_email: usr_mail };
     console.log(this.metaData);
@@ -324,18 +316,19 @@ constructor(
       this.dataService.postFloatinIp(this.instance.id, this.fipNetwork.id).subscribe(
         data => {
           console.log(JSON.stringify(data));
-          this.isVisible = true;
+          // this.isVisible = true;
           this.floatingIp = data;
           this.showFIP = true;
-
+          this.isVisible = true;
         }, err => {
           console.log(err);
-          this.isVisible = true;
+          // this.isVisible = true;
           this.showFIP = true;
           this.gotFIP = false;
+          this.isVisible = true;
 
         });
-      this.userOverview.ngOnInit();
+
       console.log("ng on init user overview called");
     }
   // TODO pridat refresh po tejto akcii na limits
@@ -349,16 +342,43 @@ constructor(
   close(): void {
     this.dialogRef.close();
   }
-
-  killMachine(id): void {
-    this.dataService.deleteInstance(id).subscribe(
+  disassociateFIP(ip): void{
+    this.message = 'Disassociating your FIP';
+    this.isVisible = false;
+    console.log(ip);
+    this.dataService.deleteFloatingIP(ip).subscribe(
       data => {
-        console.log("deleted");
+        console.log("disassociating fip");
       }
     );
-    this.helper(this.instances.length);
+    this.disassociateFIPHelper(this.limit.floating_ips.used);
   }
-  helper(count): void {
+  disassociateFIPHelper(count): void{
+    this.dataService.getLimit().subscribe(
+      data => {
+        this.limit = data;
+      }
+    );
+    if (count === this.limit.floating_ips.used){
+      this.delay(1500).then( any => {
+        this.disassociateFIPHelper(count);
+      });
+    } else {
+      console.log("deleted");
+      this.ngOnInit();
+    }
+  }
+  killMachine(id): void {
+    this.message = 'Killing your machine';
+    this.isVisible = false;
+    this.dataService.deleteInstance(id).subscribe(
+      data => {
+        console.log("deleting machine");
+      }
+    );
+    this.killMachineHelper(this.instances.length);
+  }
+  killMachineHelper(count): void {
     this.dataService.getInstances().subscribe(
       data => {
         this.instances = data;
@@ -366,11 +386,10 @@ constructor(
     );
     if (count === this.instances.length){
       this.delay(1500).then( any => {
-        this.helper(count);
+        this.killMachineHelper(count);
       });
     } else {
       console.log("deleted");
-      this.checkRescources();
       this.ngOnInit();
     }
   }

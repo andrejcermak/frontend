@@ -1,7 +1,9 @@
 <div *ngIf="!isVisible" class="spinner">
     <mat-spinner style="margin:0 auto;">
     </mat-spinner>
+  <div>{{message}}</div>
 </div>
+
 <div *ngIf="!goodKeys">
   <button (click)="close()" id="x">X</button>
   <mat-dialog-content>
@@ -25,6 +27,7 @@
         </div>
     </mat-dialog-content>
 </div>
+
 <div *ngIf="isVisible && goodKeys && canAssignIP &&  canCreateMachine && !showFIP">
   <button (click)="close()" id="x">X</button>
   <div>
@@ -88,39 +91,41 @@
         </div>
     </mat-dialog-content>
 </div>
-<div *ngIf="!canCreateMachine || !canAssignIP">
+
+<div *ngIf="isVisible && (!canCreateMachine || !canAssignIP)">
   <button (click)="close()" id="x">X</button>
   <div *ngIf="!canCreateMachine ">
     <mat-dialog-content>
+      <div *ngIf=" ramLimit > (limit.ram.limit-limit.ram.used)">
+        You need {{ramLimit}}MB of ram, you have {{(limit.ram.limit-limit.ram.used)}}MB left</div>
+      <div *ngIf="2 > (limit.cores.limit-limit.cores.used)">
+        You need 2 cpu cores, you have {{(limit.cores.limit-limit.cores.used)}}left</div>
+      <div *ngIf="ramLimit > (limit.ram.limit-limit.ram.used) || 2 > (limit.cores.limit-limit.cores.used) ">
+        Please kill some of your machines
+      </div>
       <label>Your machines</label>
-      <table>
-        <tr *ngFor="let instance of instances">
-          <td>
-            <p>{{instance.name}}</p>
-          </td>
-          <td>
-            <button (click)="killMachine(instance.id)" class="kill">kill</button>
-          </td>
-        </tr>
-      </table>
+      <div></div>
+      <app-instance-table [hasKillButtons]=true (toBeKilled)="killMachine($event)" ></app-instance-table>
     </mat-dialog-content>
   </div>
 
   <div *ngIf="!canAssignIP ">
     <mat-dialog-content>
       <div *ngIf="(limit.floating_ips.limit - limit.floating_ips.used) < 1">
-        <label>Your floating ips</label>
+        <div>You have no free floating ip left. Please disassociate at least 1 of them</div>
+        <label>Your floating ips:</label>
         <table>
           <tr *ngFor="let fip of floatingIPs">
             <td>
               <p>{{fip.name}}</p>
             </td>
             <td>
-              <button (click)="killMachine()" class="kill">disassociate</button>
+              <button (click)="disassociateFIP(fip.name)" class="kill">disassociate</button>
             </td>
           </tr>
         </table>
       </div>
+      <app-instance-table [hasKillButtons]=true (toBeKilled)="killMachine($event)"></app-instance-table>
     </mat-dialog-content>
   </div>
 

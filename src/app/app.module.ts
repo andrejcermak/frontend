@@ -26,6 +26,7 @@ import { MessagesComponent } from './messages/messages.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { InstancesComponent } from './instances/instances.component';
 import { CallbackComponent } from './callback/callback.component';
+import { InstanceTableComponent } from './instance-table/instance-table.component';
 
 @NgModule({
   declarations: [
@@ -39,6 +40,7 @@ import { CallbackComponent } from './callback/callback.component';
     Dialogview,
     LoginDialog,
     CallbackComponent,
+    InstanceTableComponent,
   ],
   imports: [
     BrowserModule,
@@ -59,7 +61,7 @@ import { CallbackComponent } from './callback/callback.component';
     Dialogview,
     LoginDialog,
   ],
-  providers: [DataService, CookieService,Location, {provide: LocationStrategy, useClass: PathLocationStrategy}, MatDialogModule],
+  providers: [DataService, CookieService, Location, {provide: LocationStrategy, useClass: PathLocationStrategy}, MatDialogModule],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
