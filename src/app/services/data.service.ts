@@ -22,8 +22,8 @@ import { environment } from 'src/environments/environment';
 export class DataService {  //DataService takes care of all http requests and comunication with API
   private apiURL = environment.apiUrl;//"http://localhost:5000";
   private project_id:string;
-  private user_name:string;
-  private user_email:string;
+  // private user_name:string;
+  // private user_email:string;
 
 
 
@@ -38,11 +38,20 @@ export class DataService {  //DataService takes care of all http requests and co
     it will be automatically parsed from the JSON response
   */
 
-  getLimit (): Observable<Limit> {
+  deleteInstance(id): Observable<Instance> {
+    console.log("killing machine");
+    return this.httpClient.delete<Instance>(this.apiURL + "/instances/" + id + "/");
+  }
+  deleteFloatingIP(ip) {
+    return this.httpClient.delete(this.apiURL + "/floating_ips/" + ip + "ip");
+  }
+
+
+  getLimit(): Observable<Limit> {
       return this.httpClient.get<Limit>(this.apiURL+"/limits/");
   }
 
-  getNetwork (): Observable<Network[]> {
+  getNetwork(): Observable<Network[]> {
     return this.httpClient.get<Network[]>(this.apiURL+"/networks/");
   }
 
@@ -88,42 +97,49 @@ export class DataService {  //DataService takes care of all http requests and co
     return this.httpClient.post<Keypair>(this.apiURL+"/keypairs/",{keyname:name});
   };
 
-  postSecurityRulesSsh(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"ssh"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
+  // postSecurityRulesSsh(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"ssh"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesIcmp(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"all_icmp"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesHttp(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"http"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
+  //
+  // postSecurityRulesHttps(id:string):void{
+  //   this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"https"}).toPromise().then((data:any) => {
+  //   },
+  //   (err:any) =>{
+  //     console.log(err);
+  //   });
+  //
+  // }
 
-  }
-
-  postSecurityRulesIcmp(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"all_icmp"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
-  postSecurityRulesHttp(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"http"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
-  postSecurityRulesHttps(id:string):void{
-    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:"https"}).toPromise().then((data:any) => {
-    },
-    (err:any) =>{
-      console.log(err);
-    });
-
-  }
-
+  postSecurityRule(id:string, type:string):void{
+    this.httpClient.post(this.apiURL+"/security_groups/"+id+"/security_group_rules/",{type:type}).toPromise().then((data:any) => {
+      },
+      (err:any) =>{
+        console.log(err);
+      });
+    }
   postFloatinIp(instance_id:string, network_id:string):Observable<FIP>{
     return this.httpClient.post<FIP>(this.apiURL+"/floating_ips/", {instance_id:instance_id,network_id:network_id});
   }
@@ -141,11 +157,13 @@ export class DataService {  //DataService takes care of all http requests and co
   */
 
   setUserName(name:string):void{
-    this.user_name=name;
+    console.log('username was set');
+    localStorage.setItem("userName", name);
   }
 
   getUserName():string{
-    return this.user_name;
+    return localStorage.getItem('userName');
+
   }
 
   setProjectId(id:string):void{
@@ -157,13 +175,12 @@ export class DataService {  //DataService takes care of all http requests and co
   }
 
   setUserEmail(mail:string):void{
-    this.user_email=mail;
+    localStorage.setItem("userEmail", mail);
   }
 
   getUserEmail():string{
-    return this.user_email;
+    return localStorage.getItem('userEmail');
+
   }
-
-
 
 }
