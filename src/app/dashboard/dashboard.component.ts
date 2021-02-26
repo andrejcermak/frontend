@@ -120,6 +120,11 @@ constructor(
       this.image = 'debian-9-x86_64_bioconductor';
       this.ramLimit = 16384;
       this.isWindows = false;
+    }else if (this.data.VolumeType === 'bio_deb_10') {
+      this.flavor = 'standard.2core-16ram';
+      this.image = 'debian-10-x86_64_bioconductor';
+      this.ramLimit = 16384;
+      this.isWindows = false;
     } else if (this.data.VolumeType === 'win') {
       this.flavor = 'standard.medium';
       this.image = 'windows-server-2019-standard-eval-x86_64';
